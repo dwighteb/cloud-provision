@@ -1,5 +1,5 @@
 provider "google" {
-  credentials = "${file("~/.gcloud/Terraform-my-test.json")}"
+  credentials = "${file("~/.gcloud/Terraform-test-project.json")}"
   project     = "my-test-project-166915"
   region      = "us-east1"
 }
