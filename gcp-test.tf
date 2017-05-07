@@ -5,7 +5,7 @@ provider "google" {
 }
 
 resource "google_compute_instance_template" "http8080" {
-  name           = "test-instance1"
+  name           = "http8080"
   machine_type   = "f1-micro"
   can_ip_forward = false
 
@@ -18,9 +18,9 @@ resource "google_compute_instance_template" "http8080" {
   network_interface {
     network = "default"
 
-    # access_config {
-    #   // ephermeral IP
-    # }
+    access_config {
+      // ephermeral IP
+    }
   }
 
   metadata_startup_script = <<-EOF
@@ -64,13 +64,20 @@ resource "google_compute_autoscaler" "http8080" {
   }
 }
 
-# resource "google_compute_firewall" "http8080" {
-#   name    = "http-8080-allow"
-#   network = "default"
-#   source_ranges = ["0.0.0.0/0"]
-#
-#   allow {
-#     protocol = "tcp"
-#     ports    = ["8080"]
-#   }
-# }
+resource "google_compute_forwarding_rule" "http8080" {
+  name        = "vpn-forward"
+  target      = "${google_compute_target_pool.http8080.self_link}"
+  ip_protocol = "TCP"
+  port_range  = "8080"
+}
+
+resource "google_compute_firewall" "http8080" {
+  name    = "http-8080-allow"
+  network = "default"
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8080"]
+  }
+}
