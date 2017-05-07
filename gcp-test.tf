@@ -8,9 +8,8 @@ resource "google_compute_instance" "test-instance" {
   name  = "test-instance1"
   machine_type = "f1-micro"
   zone = "us-east1-b"
-  can_ip_forward = true
 
-  tags = ["test-instance"]
+  tags = ["test-instance", "http-8080"]
 
   disk {
     image = "ubuntu-os-cloud/ubuntu-1604-lts"
