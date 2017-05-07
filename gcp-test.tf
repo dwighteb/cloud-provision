@@ -4,23 +4,23 @@ provider "google" {
   region      = "us-east1"
 }
 
-resource "google_compute_instance" "test-instance" {
-  name  = "test-instance1"
-  machine_type = "f1-micro"
-  zone = "us-east1-b"
+resource "google_compute_instance_template" "http8080" {
+  name           = "test-instance1"
+  machine_type   = "f1-micro"
+  can_ip_forward = false
 
-  tags = ["test-instance", "http-8080"]
+  tags = ["test-instance", "http8080"]
 
   disk {
-    image = "ubuntu-os-cloud/ubuntu-1604-lts"
+    source_image = "ubuntu-os-cloud/ubuntu-1604-lts"
   }
 
   network_interface {
     network = "default"
 
-    access_config {
-      // ephermeral IP
-    }
+    # access_config {
+    #   // ephermeral IP
+    # }
   }
 
   metadata_startup_script = <<-EOF
@@ -35,13 +35,42 @@ resource "google_compute_instance" "test-instance" {
   }
 }
 
-resource "google_compute_firewall" "http-8080" {
-  name    = "http-8080-allow"
-  network = "default"
-  source_ranges = ["0.0.0.0/0"]
+resource "google_compute_target_pool" "http8080" {
+  name = "http8080"
+}
 
-  allow {
-    protocol = "tcp"
-    ports    = ["8080"]
+resource "google_compute_instance_group_manager" "http8080" {
+  name = "http8080"
+  zone = "us-east1-b"
+
+  instance_template  = "${google_compute_instance_template.http8080.self_link}"
+  target_pools       = ["${google_compute_target_pool.http8080.self_link}"]
+  base_instance_name = "http8080"
+}
+
+resource "google_compute_autoscaler" "http8080" {
+  name   = "http8080"
+  zone   = "us-east1-b"
+  target = "${google_compute_instance_group_manager.http8080.self_link}"
+
+  autoscaling_policy = {
+    max_replicas    = 5
+    min_replicas    = 1
+    cooldown_period = 60
+
+    cpu_utilization {
+      target = 0.5
+    }
   }
 }
+
+# resource "google_compute_firewall" "http8080" {
+#   name    = "http-8080-allow"
+#   network = "default"
+#   source_ranges = ["0.0.0.0/0"]
+#
+#   allow {
+#     protocol = "tcp"
+#     ports    = ["8080"]
+#   }
+# }
