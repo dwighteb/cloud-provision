@@ -64,11 +64,16 @@ resource "google_compute_autoscaler" "http8080" {
   }
 }
 
+resource "google_compute_address" "http8080" {
+  name = "http8080-address"
+}
+
 resource "google_compute_forwarding_rule" "http8080" {
-  name        = "vpn-forward"
+  name        = "http8080"
   target      = "${google_compute_target_pool.http8080.self_link}"
   ip_protocol = "TCP"
   port_range  = "8080"
+  ip_address  = "${google_compute_address.http8080.address}"
 }
 
 resource "google_compute_firewall" "http8080" {
