@@ -37,6 +37,16 @@ resource "google_compute_instance_template" "http8080" {
 
 resource "google_compute_target_pool" "http8080" {
   name = "http8080"
+  health_checks = [
+      "${google_compute_http_health_check.http8080.name}",
+    ]
+}
+
+resource "google_compute_http_health_check" "http8080" {
+  name         = "http8080"
+  port         = 8080
+  timeout_sec        = 1
+  check_interval_sec = 5
 }
 
 resource "google_compute_instance_group_manager" "http8080" {
