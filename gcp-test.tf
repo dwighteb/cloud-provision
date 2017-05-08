@@ -66,7 +66,7 @@ resource "google_compute_autoscaler" "http8080" {
   autoscaling_policy = {
     max_replicas    = 5
     min_replicas    = 1
-    cooldown_period = 60
+    cooldown_period = 120
 
     cpu_utilization {
       target = 0.5
@@ -84,6 +84,10 @@ resource "google_compute_forwarding_rule" "http8080" {
   ip_protocol = "TCP"
   port_range  = "8080"
   ip_address  = "${google_compute_address.http8080.address}"
+}
+
+output "IP Address for load balancer" {
+  value = "${google_compute_address.http8080.address}"
 }
 
 resource "google_compute_firewall" "http8080" {
