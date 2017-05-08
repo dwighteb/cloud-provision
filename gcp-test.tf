@@ -4,12 +4,17 @@ provider "google" {
   region      = "us-east1"
 }
 
-resource "google_compute_instance_template" "http8080" {
-  name           = "http8080"
+variable "server_port" {
+  description = "The port the server will use for HTTP requests"
+  default     = 8080
+}
+
+resource "google_compute_instance_template" "busyboxtest" {
+  name           = "busyboxtest"
   machine_type   = "f1-micro"
   can_ip_forward = false
 
-  tags = ["test-instance", "http8080"]
+  tags = ["test-instance", "busyboxtest"]
 
   disk {
     source_image = "ubuntu-os-cloud/ubuntu-1604-lts"
@@ -26,7 +31,7 @@ resource "google_compute_instance_template" "http8080" {
   metadata_startup_script = <<-EOF
                             #!/bin/bash
                             echo "Hello, World" > index.html
-                            nohup busybox httpd -f -p 8080 &
+                            nohup busybox httpd -f -p "${var.server_port}" &
                             EOF
 
 
@@ -35,33 +40,33 @@ resource "google_compute_instance_template" "http8080" {
   }
 }
 
-resource "google_compute_target_pool" "http8080" {
-  name = "http8080"
+resource "google_compute_target_pool" "busyboxtest" {
+  name = "busyboxtest"
   health_checks = [
-      "${google_compute_http_health_check.http8080.name}",
+      "${google_compute_http_health_check.busyboxtest.name}",
     ]
 }
 
-resource "google_compute_http_health_check" "http8080" {
-  name         = "http8080"
-  port         = 8080
+resource "google_compute_http_health_check" "busyboxtest" {
+  name         = "busyboxtest"
+  port         = "${var.server_port}"
   timeout_sec        = 1
   check_interval_sec = 5
 }
 
-resource "google_compute_instance_group_manager" "http8080" {
-  name = "http8080"
+resource "google_compute_instance_group_manager" "busyboxtest" {
+  name = "busyboxtest"
   zone = "us-east1-b"
 
-  instance_template  = "${google_compute_instance_template.http8080.self_link}"
-  target_pools       = ["${google_compute_target_pool.http8080.self_link}"]
-  base_instance_name = "http8080"
+  instance_template  = "${google_compute_instance_template.busyboxtest.self_link}"
+  target_pools       = ["${google_compute_target_pool.busyboxtest.self_link}"]
+  base_instance_name = "busyboxtest"
 }
 
-resource "google_compute_autoscaler" "http8080" {
-  name   = "http8080"
+resource "google_compute_autoscaler" "busyboxtest" {
+  name   = "busyboxtest"
   zone   = "us-east1-b"
-  target = "${google_compute_instance_group_manager.http8080.self_link}"
+  target = "${google_compute_instance_group_manager.busyboxtest.self_link}"
 
   autoscaling_policy = {
     max_replicas    = 5
@@ -74,29 +79,29 @@ resource "google_compute_autoscaler" "http8080" {
   }
 }
 
-resource "google_compute_address" "http8080" {
-  name = "http8080-address"
+resource "google_compute_address" "busyboxtest" {
+  name = "busyboxtest"
 }
 
-resource "google_compute_forwarding_rule" "http8080" {
-  name        = "http8080"
-  target      = "${google_compute_target_pool.http8080.self_link}"
+resource "google_compute_forwarding_rule" "busyboxtest" {
+  name        = "busyboxtest"
+  target      = "${google_compute_target_pool.busyboxtest.self_link}"
   ip_protocol = "TCP"
-  port_range  = "8080"
-  ip_address  = "${google_compute_address.http8080.address}"
+  port_range  = "${var.server_port}"
+  ip_address  = "${google_compute_address.busyboxtest.address}"
 }
 
 output "IP Address for load balancer" {
-  value = "${google_compute_address.http8080.address}"
+  value = "${google_compute_address.busyboxtest.address}"
 }
 
-resource "google_compute_firewall" "http8080" {
-  name    = "http-8080-allow"
+resource "google_compute_firewall" "busyboxtest" {
+  name    = "busyboxtest"
   network = "default"
   source_ranges = ["0.0.0.0/0"]
 
   allow {
     protocol = "tcp"
-    ports    = ["8080"]
+    ports    = ["${var.server_port}"]
   }
 }
