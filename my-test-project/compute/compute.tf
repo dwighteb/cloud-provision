@@ -1,7 +1,23 @@
 provider "google" {
-  credentials = "${file("~/.gcloud/Terraform-test-project.json")}"
   project     = "my-test-project-166915"
   region      = "us-east1"
+}
+
+terraform {
+  backend "gcs" {
+    bucket  = "tf-state-dwight"
+    path    = "my-test-project/compute/terraform.tfstate"
+    project = "mystical-sweep-166814"
+  }
+}
+
+data "terraform_remote_state" "address" {
+  backend = "gcs"
+  config {
+    bucket  = "tf-state-dwight"
+    path    = "my-test-project/address/terraform.tfstate"
+    project = "mystical-sweep-166814"
+  }
 }
 
 variable "server_port" {
@@ -79,20 +95,12 @@ resource "google_compute_autoscaler" "busyboxtest" {
   }
 }
 
-resource "google_compute_address" "busyboxtest" {
-  name = "busyboxtest"
-}
-
 resource "google_compute_forwarding_rule" "busyboxtest" {
   name        = "busyboxtest"
   target      = "${google_compute_target_pool.busyboxtest.self_link}"
   ip_protocol = "TCP"
   port_range  = "${var.server_port}"
-  ip_address  = "${google_compute_address.busyboxtest.address}"
-}
-
-output "IP Address for load balancer" {
-  value = "${google_compute_address.busyboxtest.address}"
+  ip_address  = "${data.terraform_remote_state.address.ipaddress}"
 }
 
 resource "google_compute_firewall" "busyboxtest" {
