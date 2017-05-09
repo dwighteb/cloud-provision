@@ -14,3 +14,7 @@ terraform {
 resource "google_compute_address" "vpn-ipaddress" {
   name = "vpn-ipaddress"
 }
+
+output "ipaddress" {
+  value = "${google_compute_address.vpn-ipaddress.address}"
+}

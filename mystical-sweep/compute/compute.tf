@@ -11,9 +11,13 @@ terraform {
   }
 }
 
-variable "ip_address" {
-  description = "The IP Address created for the vpn"
-  default     = "35.185.10.131"
+data "terraform_remote_state" "address" {
+  backend = "gcs"
+  config {
+    bucket  = "tf-state-dwight"
+    path    = "mystical-sweep/address/terraform.tfstate"
+    project = "mystical-sweep-166814"
+  }
 }
 
 resource "google_compute_instance" "vpn-instance" {
@@ -32,7 +36,7 @@ resource "google_compute_instance" "vpn-instance" {
     network = "default"
 
     access_config {
-      nat_ip = "${var.ip_address}"
+      nat_ip = "${data.terraform_remote_state.address.ipaddress}"
     }
   }
 
