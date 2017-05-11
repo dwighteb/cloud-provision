@@ -1,13 +1,13 @@
 provider "google" {
-  project     = "mystical-sweep-166814"
+  project     = "my-test-project-166915"
   region      = "us-east1"
 }
 
 terraform {
   backend "gcs" {
-    bucket  = "tf-state-dwight"
-    path    = "mystical-sweep/vpn/address/terraform.tfstate"
-    project = "mystical-sweep-166814"
+    bucket  = "tf-state-dwighteb"
+    path    = "my-test-project/vpn/address/terraform.tfstate"
+    project = "my-test-project-166915"
   }
 }
 

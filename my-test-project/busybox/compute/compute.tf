@@ -1,22 +1,22 @@
 provider "google" {
-  project     = "mystical-sweep-166814"
+  project     = "my-test-project-166915"
   region      = "us-east4"
 }
 
 terraform {
   backend "gcs" {
-    bucket  = "tf-state-dwight"
-    path    = "mystical-sweep/busybox/compute/terraform.tfstate"
-    project = "mystical-sweep-166814"
+    bucket  = "tf-state-dwighteb"
+    path    = "my-test-project/busybox/compute/terraform.tfstate"
+    project = "my-test-project-166915"
   }
 }
 
 data "terraform_remote_state" "address" {
   backend = "gcs"
   config {
-    bucket  = "tf-state-dwight"
-    path    = "mystical-sweep/busybox/address/terraform.tfstate"
-    project = "mystical-sweep-166814"
+    bucket  = "tf-state-dwighteb"
+    path    = "my-test-project/busybox/address/terraform.tfstate"
+    project = "my-test-project-166915"
   }
 }
 
