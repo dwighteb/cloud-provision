@@ -1,12 +1,12 @@
 provider "google" {
-  project     = "my-test-project-166915"
-  region      = "us-east1"
+  project     = "mystical-sweep-166814"
+  region      = "us-east4"
 }
 
 terraform {
   backend "gcs" {
     bucket  = "tf-state-dwight"
-    path    = "my-test-project/compute/terraform.tfstate"
+    path    = "mystical-sweep/busybox/compute/terraform.tfstate"
     project = "mystical-sweep-166814"
   }
 }
@@ -15,7 +15,7 @@ data "terraform_remote_state" "address" {
   backend = "gcs"
   config {
     bucket  = "tf-state-dwight"
-    path    = "my-test-project/address/terraform.tfstate"
+    path    = "mystical-sweep/busybox/address/terraform.tfstate"
     project = "mystical-sweep-166814"
   }
 }
@@ -72,7 +72,7 @@ resource "google_compute_http_health_check" "busyboxtest" {
 
 resource "google_compute_instance_group_manager" "busyboxtest" {
   name = "busyboxtest"
-  zone = "us-east1-b"
+  zone = "us-east4-b"
 
   instance_template  = "${google_compute_instance_template.busyboxtest.self_link}"
   target_pools       = ["${google_compute_target_pool.busyboxtest.self_link}"]
@@ -81,7 +81,7 @@ resource "google_compute_instance_group_manager" "busyboxtest" {
 
 resource "google_compute_autoscaler" "busyboxtest" {
   name   = "busyboxtest"
-  zone   = "us-east1-b"
+  zone   = "us-east4-b"
   target = "${google_compute_instance_group_manager.busyboxtest.self_link}"
 
   autoscaling_policy = {

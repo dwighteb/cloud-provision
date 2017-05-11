@@ -1,12 +1,12 @@
 provider "google" {
-  project     = "my-test-project-166915"
-  region      = "us-east1"
+  project     = "mystical-sweep-166814"
+  region      = "us-east4"
 }
 
 terraform {
   backend "gcs" {
     bucket  = "tf-state-dwight"
-    path    = "my-test-project/address/terraform.tfstate"
+    path    = "mystical-sweep/busybox/address/terraform.tfstate"
     project = "mystical-sweep-166814"
   }
 }

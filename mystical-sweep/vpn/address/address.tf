@@ -6,7 +6,7 @@ provider "google" {
 terraform {
   backend "gcs" {
     bucket  = "tf-state-dwight"
-    path    = "mystical-sweep/address/terraform.tfstate"
+    path    = "mystical-sweep/vpn/address/terraform.tfstate"
     project = "mystical-sweep-166814"
   }
 }
