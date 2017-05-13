@@ -2,6 +2,14 @@ provider "aws" {
   region = "us-east-1"
 }
 
+terraform {
+  backend "s3" {
+    bucket = "tfstate-dwighteb-com"
+    key    = "aws/vpn"
+    region = "us-east-1"
+  }
+}
+
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -48,6 +56,7 @@ resource "aws_instance" "vpn" {
   instance_type = "t2.nano"
   subnet_id     = "${data.aws_subnet_ids.public.ids[0]}"
   key_name      = "dwighteb@20160709.mbp3"
+
   associate_public_ip_address = true
   ipv6_address_count = 1  // terraform destroys if this isn't set
 
